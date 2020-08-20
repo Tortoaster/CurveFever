@@ -26,10 +26,12 @@ Curve Fever is a popular computer game for 2-4 players.
 We wrote this project based on an open source python implementation of Curve fever using the pygame library. The original implementation can be found in this [repository](link to repository) 
 
 We built 2 computer agents that can be initialized as players in the game.
-- A Min-Max agent: 
-Preforms a search of the game tree using alpha-beta pruning. It uses a weighted sum of a few heuristis evaluate the nodes of the tree and chooses the best move in each timestep. 
-- Deep reinforcement learning Agent: 
-Extracts features from the game state at every time step and evalueates the feature vector using a trained neural net to choose an action.
+- **Min-Max agent:**
+
+    Preforms a search of the game tree using alpha-beta pruning. It uses a weighted sum of a few heuristis evaluate the nodes of the tree and chooses the best move in each timestep. 
+- **Deep reinforcement learning Agent: **
+
+    Extracts features from the game state at every time step and evalueates the feature vector using a trained neural net to choose an action.
 
 
 
