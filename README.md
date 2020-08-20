@@ -17,13 +17,14 @@ Description
 
 Curve Fever is a popular computer game for 2-4 players. 
 
-**Game flow**
+**Game flow:**
+
 "Each player spawns as a dot at a random spot on the playing field, move at a constant speed. Each player has the ability to turn left or right, although the turning speed is limited such that sharp turns are not possible. As the dot travels across the playing field, it draws a permanent, solid line in its wake, in the color of that player. When the dot collides with any section of line or the boundary of the playing field, the player instantly loses, although the line remains in the playing field until the end of the game. The game becomes increasingly difficult as more of the playing field is blocked off by lines. Other players may try to draw barriers to block the path of other players, forcing them into a collision. However, as the lines are being drawn, gaps are occasionally being generated that can be used to escape a section of the map that has been blocked off. The game is won when all but one of the players has collided." - Wikepadia
 
 <img src="static/img/CurveFever.gif" width="550" height="400"/>
 
 
-We wrote this project based on an open source python implementation of Curve fever using the pygame library. The original implementation can be found in this [repository](link to repository) 
+We wrote this project based on an open source python implementation of Curve fever using the pygame library. The original implementation can be found in this [repository](https://github.com/Valaraucoo/AchtungDiePython.git) 
 
 We designed and trained 2 computer agents that can be initialized as players in the game.
 - **Min-Max agent:**
@@ -45,24 +46,7 @@ Feel free to send any comments or questions regarding this project to danielrote
 
 Thank you
 In order to run the game, install all libraries specified in requierments.txt and than run main.py with python >= 3.7
-Double DQN
-=====
 
-
-description
------------
-A double deep Q-learning library implemented in python3 using [tensorflow](https://www.tensorflow.org/)
-
-Q-learning is is a model-free [reinforcement learning](https://en.wikipedia.org/wiki/Reinforcement_learning) algorithm 
-to learn a policy telling an agent what action to take under what circumstances. 
-This library provides the basic structure to learn a policy in an environment using the 
-[Double-deep Q-learning](https://arxiv.org/pdf/1509.06461.pdf) algorithm.
- 
-The code files in this project include: 
-- **dqn_agent.py:**
-- **double_dqn.py:** 
-- **experience_replay.py:** 
-- **dqn_env.py:** 
  
 installation
 --------
