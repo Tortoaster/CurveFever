@@ -1,4 +1,4 @@
-## Curve Fever - Curve fever
+## Curve Fever - Achtung Die!
 
 Final project in introduction to artificial inteligernce course at Hebrew university in Jerusalem.
 
