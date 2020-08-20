@@ -35,57 +35,25 @@ We designed and trained 2 computer agents that can be initialized as players in 
 
     Extracts features from the game state at every time step and evalueates the feature vector using a trained neural net to choose an action.
 
-
-
-
-Be sure to try out the game and test yourself against our DRL agent.
-
-In order to run the game, install all libraries listed in requierments.txt and run main.py with python >=3.7
-
-Feel free to send any comments or questions regarding this project to danielrotem@mail.huji.ac.il
-
-Thank you
-In order to run the game, install all libraries specified in requierments.txt and than run main.py with python >= 3.7
-
  
 installation
 --------
 
 ### clone
-Clone this repository to your local machine using 'repository address goes here'
+Clone this repository to your local machine using 'https://github.com/dayMan33/CurveFever.git'
             
-    git clone https://github.com/dayMan33/double_DQN.git
+    git clone https://github.com/dayMan33/CurveFever.git
 
 ### setup 
 while in the project directory, run setup.sh to install all requirements.
 
-    double_dqn> setup.sh
+    CurveFever> setup.sh
+   
+Once all dependencies are satisfied, You can run main.py using pytohn>=3.7
 
 usage
 -----
-To start training an agent, you must implement a class of dqn_env with the required methods. Only then can you 
-initialize a dqn_agent with an instance of the environment as its only argument. Once you have done that, you will need
-to set the model of the agent to be a compiled tf.keras Model tailored specifically to your environment's needs. 
-After setting the agent's model, you can train it by calling dqn_agent.train with the necessary arguments
- 
-```python
-    from double_dqn.dqn_env import DQNenv
-    from double_dqn.dqn_agent import DQNagent
-
-    path = 'model_path'
-    num_episodes = N
-    env = MyEnv() # Inherits from DQNenv
-    agent = DQNagent(env)
-    
-    # A compiled tf.keral Model to use as the agent's NN.
-    model = build_model(env.get_state_shape(), env.get_action_shape())
-    agent.set_model(model)
-    agent.train(num_episodes, path)
-```
-    
-The train method saves the weights and the model architecture to the specified path
-
-For a more detailed example, check out this [repository](https://github.com/dayMan33/double_dqn_usage.git)
+Choose at least 2 players and start playing. Try yourself against both agents and see how you compare
 
 support
 -------
