@@ -87,9 +87,9 @@ class CurveFever(object):
         pressed_button_color = (119, 136, 153)
         rectangle_width = 110
         rectangle_height = 30
-        texts = ['Human - arrows', 'Human - WASD', 'DRL', 'min-max', 'no_player']
-        pressed = np.zeros((5, 5))  # [[False for _ in range(4)] for __ in range(4)]
-        pressed[4, ...] = 1
+        ais = ['Human - arrows', 'Human - WASD', 'DRL', 'min-max', 'NEAT', 'no_player']
+        pressed = np.zeros((len(ais), len(ais)))  # [[False for _ in range(4)] for __ in range(4)]
+        pressed[len(ais) - 1, ...] = 1
 
         # create all font objects
         headline_1 = pygame.font.SysFont('Corbel', 70, bold=True)
@@ -145,11 +145,11 @@ class CurveFever(object):
         # Create button text and rectangles
         buttons_text = []
         buttons_rect = []
-        for i in range(5):
+        for i in range(len(ais)):
             temp_texts = []
             temp_rects = []
-            for j in range(5):
-                temp_texts.append(button_font.render(texts[i], True, BLACK))
+            for j in range(len(ais)):
+                temp_texts.append(button_font.render(ais[i], True, BLACK))
                 temp_rects.append(temp_texts[j].get_rect())
                 temp_rects[j].center = ((j + 1) * SCREEN_WIDTH // 5, (i + 6) * SCREEN_HEIGHT / 13)
             buttons_text.append(temp_texts)
@@ -180,8 +180,8 @@ class CurveFever(object):
                 self.window.blit(play, play_rect)
 
                 # update all player buttons -
-                for i in range(5):
-                    for j in range(4):
+                for i in range(len(ais)):
+                    for j in range(len(CurveFever.colors)):
                         rect = pygame.Rect(buttons_rect[i][j].center[0] - (rectangle_width // 2),
                                            buttons_rect[i][j].center[1] - (rectangle_height // 2), rectangle_width,
                                            rectangle_height)
@@ -201,7 +201,7 @@ class CurveFever(object):
                         self.window.blit(buttons_text[i][j], buttons_rect[i][j])
 
                 pygame.display.update()
-        possible_players = ['ha', 'hw', 'd', 'ab']
+        possible_players = ['ha', 'hw', 'd', 'ab', 'n']
         players = [possible_players[i] for i in np.where(pressed.T[:, :-1])[1]]
         return players
 

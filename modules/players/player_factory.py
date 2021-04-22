@@ -2,6 +2,7 @@ from modules.players.regular_player import RegularHumanPlayer
 from modules.players.drl_player import DRLPlayer
 from modules.players.random_player import RandomPlayer
 from modules.players.alpha_beta_player import AlphaBetaPlayer
+from modules.players.neat_player import NeatPlayer
 from static.settings import *
 import pygame
 
@@ -25,3 +26,5 @@ class PlayerFactory:
             return RandomPlayer(id, game)
         elif player_type == 'ab':
             return AlphaBetaPlayer(id, game, MIN_MAX_DEPTH)
+        elif player_type == 'n':
+            return NeatPlayer(id, game)
