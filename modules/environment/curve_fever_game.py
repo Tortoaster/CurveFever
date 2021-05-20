@@ -273,10 +273,13 @@ class CurveFever(object):
         winner = False
         counter = 0
         while not winner:
-            if counter % 10000:
-                print('.',end = '')
-            # if self.counter % 10000:
-            #     print(self.state.alive)
+            if (counter % 5000) == 0:
+                print(counter)
+            if counter > 100000:
+                print("This one is stuck aborting...")
+                return
+            # if counter % 100000:
+            #     print(any(self.state.alive),end = '')
             counter += 1
             self.training_tick()
             if not counter % 5:  # only sample action every few moves
@@ -285,13 +288,16 @@ class CurveFever(object):
                 if np.sum(self.state.alive) < 0:
                     print("ALIVE SNAKES BELOW 0 FUCK THIS GUY")
                 return
+
     def training_tick(self):
         self.apply_actions()
         self.update_positions()
         self.update_lives()
         self.training_update_states()
 
-
+    def training_update_states(self):
+        for i in range(len(self.players)):
+            self.state.set_angle(i, self.angles[i])
 
     def tick(self):
         self.apply_actions()
@@ -301,8 +307,6 @@ class CurveFever(object):
         if not self.training_mode:
             self.update_graphics()
         self.update_states()
-
-
 
     def update_actions(self):
         """ Gets for all players still alive"""
@@ -369,10 +373,6 @@ class CurveFever(object):
                     self.no_draw_counters[i] = 0
                     self.draw_limits[i] = self.initialize_draw_limit()
                     self.draw_status[i] = True
-
-    def training_update_states(self):
-        for i in range(len(self.players)):
-            self.state.set_angle(i, self.angles[i])
 
     def update_states(self):
         for i in range(len(self.players)):

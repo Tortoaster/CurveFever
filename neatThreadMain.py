@@ -1,39 +1,44 @@
 from modules.environment.curve_fever_game import CurveFever
 from modules.players.neat_player import NeatPlayer
-from threading import Lock, Thread
+import threading
 import neat
 import pickle
 import os
 
-fitnessLock = Lock()
+fitnessLock = threading.Lock()
 highest_fitness = 0
 
 def eval_genomes(genomes, config):
-    global highest_fitness
-    neat_players = []
+    threads = [genome(genomes[i:i+4], i, i+4, config) for i in range(0,len(genomes),4)]
+    for t in threads:
+        t.start()
+    [t.join() for t in threads]
 
-    
-    
-    
-    for i in range(0,len(genomes),4):
-        # for genome_id, genome in genomes:
-        game = CurveFever(training_mode=True)
+class genome (threading.Thread):
+    def __init__(self, genomes, begin, end, config):
+        threading.Thread.__init__(self)
+        self.genomes = genomes
+        self.game = CurveFever(training_mode=True)
+        self.config = config
+        self.players = self.create_players()
+        self.begin = begin
+        self.end = end
+
+    def create_players(self):
         player_id = 0
-        tmp_players = []
-        for _, genome in genomes[i:i+4]:
-            net = neat.nn.FeedForwardNetwork.create(genome, config)
-            player = NeatPlayer(player_id, game, genome, net)
-            neat_players.append(player)
-            tmp_players.append(player)
-            player_id = player_id + 1
-        print("Range", i, i+4)
-        game.initialize(tmp_players)
-        game.training_loop()
-    
-        player = max(neat_players, key=lambda k:k.genome.fitness)
-        fitness = player.genome.fitness
-        print(fitness, highest_fitness)
+        tmp = []
+        for _, genome in self.genomes:
+            net = neat.nn.FeedForwardNetwork.create(genome, self.config)
+            tmp.append(NeatPlayer(player_id, self.game, genome, net))
+            player_id += 1
+        return tmp
 
+    def run(self):
+        print("Range", self.begin, self.end)
+        self.game.initialize(self.players)
+        self.game.training_loop()
+        player = max(self.players, key=lambda k:k.genome.fitness)
+        fitness = player.genome.fitness
         checkHighest(fitness, player.net)
 
 def checkHighest(fitness, net):
@@ -42,9 +47,9 @@ def checkHighest(fitness, net):
 
     if fitness > highest_fitness:
         highest_fitness = fitness
-        # Save network if score improves
-        if fitness > 750:
-            pickle.dump(net, open(("pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
+        
+        print("Highest fitness:",highest_fitness)
+        pickle.dump(net, open(("pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
     fitnessLock.release()
 
 def run(config_file):
