@@ -271,19 +271,27 @@ class CurveFever(object):
 
     def training_loop(self):
         winner = False
+        counter = 0
         while not winner:
-            if self.counter % 10000:
+            if counter % 10000:
                 print('.',end = '')
             # if self.counter % 10000:
             #     print(self.state.alive)
-            self.counter += 1
+            counter += 1
             self.training_tick()
-            if not self.counter % self.action_sampling_rate:  # only sample action every few moves
+            if not counter % 5:  # only sample action every few moves
                 self.update_actions()
             if np.sum(self.state.alive) <= 0:
                 if np.sum(self.state.alive) < 0:
                     print("ALIVE SNAKES BELOW 0 FUCK THIS GUY")
                 return
+    def training_tick(self):
+        self.apply_actions()
+        self.update_positions()
+        self.update_lives()
+        self.training_update_states()
+
+
 
     def tick(self):
         self.apply_actions()
@@ -294,11 +302,7 @@ class CurveFever(object):
             self.update_graphics()
         self.update_states()
 
-    def training_tick(self):
-        self.apply_actions()
-        self.update_positions()
-        self.update_lives()
-        self.training_update_states()
+
 
     def update_actions(self):
         """ Gets for all players still alive"""
