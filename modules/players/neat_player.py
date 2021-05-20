@@ -7,8 +7,8 @@ from static.settings import *
 
 MAX_RAY_LENGTH = math.sqrt(ARENA_WIDTH ** 2 + ARENA_HEIGHT ** 2)
 SPACING = PLAYER_RADIUS * 2
-RAYS = 5
-SPREAD = 15
+RAYS = 7
+SPREAD = 30
 
 
 class NeatPlayer(Player):
@@ -21,7 +21,7 @@ class NeatPlayer(Player):
 
     def cast_ray(self, angle):
         position = self.game.state.get_position(self.id)
-        angle = self.game.state.get_angle(self.id) + angle
+        angle = self.game.state.get_angle(self.id) + (angle / 180 * math.pi)
 
         index = 1
         while True:
