@@ -2,8 +2,8 @@
 # parent_dir = os.path.dirname(current_dir)
 # sys.path.insert(0, parent_dir)
 
-from static.settings import *
 from modules.players.player import Player
+from static.settings import *
 
 
 class RegularHumanPlayer(Player):

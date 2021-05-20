@@ -1,6 +1,4 @@
-import random
 import abc
-import numpy as np
 
 
 class Player(object):

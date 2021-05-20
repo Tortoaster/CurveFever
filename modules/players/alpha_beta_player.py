@@ -1,11 +1,12 @@
+import itertools
 import random
 
-from modules.players.player import Player
 import numpy as np
-import itertools
-from static.settings import *
-from modules.environment.state import State
 from typing import List
+
+from modules.environment.state import State
+from modules.players.player import Player
+from static.settings import *
 
 
 class AlphaBetaPlayer(Player):
@@ -162,6 +163,7 @@ FILL_FACTOR = 20
 NUM_ANGLES = 2
 DIST_FACTOR = 2 * FILL_FACTOR
 POS_FACTOR = 300
+
 
 class AlphaBetaHeuristic:
     def __init__(self, player, game, state, opponents):

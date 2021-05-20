@@ -1,7 +1,9 @@
-from modules.players.player import Player
-import numpy as np
 import json
+
+import numpy as np
 from tensorflow.keras.models import model_from_json
+
+from modules.players.player import Player
 
 
 class DRLPlayer(Player):

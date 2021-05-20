@@ -1,18 +1,17 @@
-import os
-import sys
 import inspect
-from typing import List
+import sys
+import time
 
 import numpy as np
-import time
+from typing import List
+
+from modules.environment.state import State
+from modules.players.player_factory import PlayerFactory
+from static.settings import *
 
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
-
-from static.settings import *
-from modules.players.player_factory import PlayerFactory
-from modules.environment.state import State
 
 
 class CurveFever(object):
@@ -24,7 +23,7 @@ class CurveFever(object):
         # self.gui = gui
         self.window = None
         self.background_img = None
-        self.arrow_img = None 
+        self.arrow_img = None
 
     def reset(self):
         self.colors = self.initialize_colors()
@@ -49,18 +48,6 @@ class CurveFever(object):
         self.initialize(players)
         self.intro()
         self.loop()
-
-
-    def neat_initialize(self, players):
-        self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
-        self.player_radius = PLAYER_RADIUS
-        self.head_radius = HEAD_RADIUS
-        self.player_speed = PLAYER_SPEED
-        self.d_theta = D_THETA
-        self.no_draw_time = NO_DRAW_TIME
-        self.action_sampling_rate = ACTION_SAMPLING_RATE
-        self.players = players
-        self.reset()
 
     def initialize(self, players):
         # if self.gui:
@@ -273,25 +260,25 @@ class CurveFever(object):
         winner = False
         counter = 0
         while not winner:
-            if counter % 10000:
-                print('.',end = '')
-            # if self.counter % 10000:
-            #     print(self.state.alive)
+            if counter % 60 == 0:
+                print('.', end='')
             counter += 1
             self.training_tick()
             if not counter % 5:  # only sample action every few moves
                 self.update_actions()
-            if np.sum(self.state.alive) <= 0:
-                if np.sum(self.state.alive) < 0:
-                    print("ALIVE SNAKES BELOW 0 FUCK THIS GUY")
+            if np.sum(self.state.alive) == 0:
                 return
+            # if counter >= 6000:
+            #     print("stuck")
+            #     return
+
     def training_tick(self):
         self.apply_actions()
         self.update_positions()
         self.update_lives()
         self.training_update_states()
-
-
+        for i in range(len(self.players)):
+            self.state.set_angle(i, self.angles[i])
 
     def tick(self):
         self.apply_actions()
@@ -301,8 +288,6 @@ class CurveFever(object):
         if not self.training_mode:
             self.update_graphics()
         self.update_states()
-
-
 
     def update_actions(self):
         """ Gets for all players still alive"""
@@ -409,6 +394,10 @@ class CurveFever(object):
             pos = head_pos
         else:
             pos = self.get_head_position(state.get_position(player_id), state.get_angle(player_id))
+        return self.detect_collision_pos(pos)
+
+    def detect_collision_pos(self, pos):
+        state = self.state
         if not self.in_bounds(pos):
             return True
         pixel = state.get_3d_pixel((int(round(pos[0])), int(round(pos[1]))))
@@ -568,9 +557,6 @@ class CurveFever(object):
         for i in range(len(players)):
             p.append(PlayerFactory.create_player(players[i], i, self))
         return p
-
-    def set_players(self, players):
-        self.players = players
 
     def initialize_angles(self):
         return np.random.uniform(0, 2 * np.pi, len(self.players))
