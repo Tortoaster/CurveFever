@@ -48,6 +48,19 @@ class CurveFever(object):
         self.intro()
         self.loop()
 
+
+    def neat_initialize(self, players):
+        self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
+        self.player_radius = PLAYER_RADIUS
+        self.head_radius = HEAD_RADIUS
+        self.player_speed = PLAYER_SPEED
+        self.d_theta = D_THETA
+        self.no_draw_time = NO_DRAW_TIME
+        self.action_sampling_rate = ACTION_SAMPLING_RATE
+        self.players = players
+        self.reset()
+
+
     def initialize(self, players):
         self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
         self.player_radius = PLAYER_RADIUS
@@ -235,7 +248,7 @@ class CurveFever(object):
             self.tick()
             if not self.counter % self.action_sampling_rate:  # only sample action every few moves
                 self.update_actions()
-            #### The actual advancing of the game ###
+            ### The actual advancing of the game ###
             if (time.time() - start) * 1000 < ITERATION_LENGTH:
                 pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
             if np.sum(self.state.alive) == 1:
@@ -243,6 +256,19 @@ class CurveFever(object):
             if self.state.is_terminal_state():
                 self.end(self.counter // self.action_sampling_rate, winner)
             pygame.display.update()
+
+    def training_loop(self):
+        winner = False
+        while not winner:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+            self.counter += 1
+            self.training_tick()
+            if not self.counter % self.action_sampling_rate:  # only sample action every few moves
+                self.update_actions()
+            if np.sum(self.state.alive) == 0:
+                winner = True
 
     def tick(self):
         self.apply_actions()
@@ -253,8 +279,14 @@ class CurveFever(object):
             self.update_graphics()
         self.update_states()
 
+    def training_tick(self):
+        self.apply_actions()
+        self.update_positions()
+        self.update_lives()
+        self.training_update_states()
+
     def update_actions(self):
-        """ Gets and applies actions for all players still alive"""
+        """ Gets for all players still alive"""
         for i, player in enumerate(self.players):
             if self.state.alive[i]:
                 self.actions[i] = player.get_action(self.state)
@@ -263,6 +295,9 @@ class CurveFever(object):
         for i, player in enumerate(self.players):
             if self.state.alive[i]:
                 self.apply_action(i, self.actions[i])
+
+    def apply_action(self, i, action):
+        self.angles[i] = self.calculate_new_angle(self.angles[i], action)
 
     ### Player API support methods ###
     def get_next_state(self, player_ids: List[int], state: State, actions: List[int]) -> State:
@@ -316,6 +351,10 @@ class CurveFever(object):
                     self.draw_limits[i] = self.initialize_draw_limit()
                     self.draw_status[i] = True
 
+    def training_update_states(self):
+        for i in range(len(self.players)):
+            self.state.set_angle(i, self.angles[i])
+
     def update_states(self):
         for i in range(len(self.players)):
             self.state.set_angle(i, self.angles[i])
@@ -366,9 +405,6 @@ class CurveFever(object):
         hx = np.cos(angle) * self.player_radius * 1.5
         hy = np.sin(angle) * self.player_radius * 1.5
         return hx + position[0], - hy + position[1]
-
-    def apply_action(self, i, action):
-        self.angles[i] = self.calculate_new_angle(self.angles[i], action)
 
     def calculate_new_angle(self, previous_angle, action):
         if action == RIGHT:
@@ -512,6 +548,9 @@ class CurveFever(object):
         for i in range(len(players)):
             p.append(PlayerFactory.create_player(players[i], i, self))
         return p
+
+    def set_players(self, players):
+        self.players = players
 
     def initialize_angles(self):
         return np.random.uniform(0, 2 * np.pi, len(self.players))
