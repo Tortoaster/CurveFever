@@ -21,6 +21,10 @@ class CurveFever(object):
 
     def __init__(self, training_mode=False):
         self.training_mode = training_mode
+        # self.gui = gui
+        self.window = None
+        self.background_img = None
+        self.arrow_img = None 
 
     def reset(self):
         self.colors = self.initialize_colors()
@@ -40,10 +44,8 @@ class CurveFever(object):
 
     ### Running the game methods ###
     def play(self):
-        if self.training_mode:
-            raise Exception('Can not play in training mode. Re-initiate the AchtungEnv object with argument '
-                            'training_mode = False')
-        players = self.entry()
+        if not self.training_mode:
+            players = self.entry()
         self.initialize(players)
         self.intro()
         self.loop()
@@ -60,8 +62,16 @@ class CurveFever(object):
         self.players = players
         self.reset()
 
-
     def initialize(self, players):
+        # if self.gui:
+        #     pygame.init()
+        #     pygame.font.init()
+        #     self.window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        #     pygame.display.set_caption(GAME_NAME)
+        #     self.background_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'whitebg.png'))
+        #     self.arrow_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'arrow.png')).convert()
+        #     self.window.blit(self.background_img, (0, 0))
+
         self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
         self.player_radius = PLAYER_RADIUS
         self.head_radius = HEAD_RADIUS
@@ -69,7 +79,10 @@ class CurveFever(object):
         self.d_theta = D_THETA
         self.no_draw_time = NO_DRAW_TIME
         self.action_sampling_rate = ACTION_SAMPLING_RATE
-        self.players = self.initialize_players(players)
+        if not self.training_mode:
+            self.players = self.initialize_players(players)
+        else:
+            self.players = players
         self.reset()
 
     def entry(self):
@@ -220,7 +233,6 @@ class CurveFever(object):
 
     def intro(self):
         for _ in range(INTRO_LEN):
-            self.counter += 1
             self.window.blit(self.background_img, (0, 0))
             self.draw_arena()
             for i, player in enumerate(self.players):
@@ -260,15 +272,18 @@ class CurveFever(object):
     def training_loop(self):
         winner = False
         while not winner:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
+            if self.counter % 10000:
+                print('.',end = '')
+            # if self.counter % 10000:
+            #     print(self.state.alive)
             self.counter += 1
             self.training_tick()
             if not self.counter % self.action_sampling_rate:  # only sample action every few moves
                 self.update_actions()
-            if np.sum(self.state.alive) == 0:
-                winner = True
+            if np.sum(self.state.alive) <= 0:
+                if np.sum(self.state.alive) < 0:
+                    print("ALIVE SNAKES BELOW 0 FUCK THIS GUY")
+                return
 
     def tick(self):
         self.apply_actions()
@@ -321,8 +336,8 @@ class CurveFever(object):
 
     ### Drawing related methods ###
     def update_graphics(self):
-        if self.training_mode:
-            raise Exception(f'Trying to draw graphics in training mode.')
+        # if self.training_mode:
+        #     raise Exception(f'Trying to draw graphics in training mode.')
         self.draw_dashboard()
         for i, player in enumerate(self.players):
             if self.state.alive[i]:
@@ -466,9 +481,10 @@ class CurveFever(object):
         self.window.blit(winner_2, winner_rect_2)
         pygame.display.update()
         pygame.time.wait(2500)
-        self.restart()
-        pygame.quit()
-        sys.exit()
+        if not self.training_mode:
+            self.restart()
+        # pygame.quit()
+        # sys.exit()
 
     def restart(self):
         self.window.fill(WHITE)
