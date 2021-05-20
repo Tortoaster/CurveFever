@@ -20,10 +20,19 @@ class NeatPlayer(Player):
         self.total_time = 0
 
     def get_action(self, state):
+        # The distances of the rays
         inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
+        # Increase fitness each time this function is called
         self.genome.fitness += 1
-        return np.random.randint(3)
-
+        # Get the ouputs from the network
+        outputs = self.net.activate(inputs)
+        if outputs[0] > 0.5 or outputs[1] > 0.5:
+            if outputs[0] > outputs[1]:
+                return LEFT
+            else:
+                return RIGHT
+        return STRAIGHT
+        
     def set_game(self, game):
         self.game = game
 
