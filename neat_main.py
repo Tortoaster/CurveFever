@@ -1,12 +1,7 @@
-import os
-import pickle
-
-import neat
-
 from modules.environment.curve_fever_game import CurveFever
 from modules.players.neat_player import NeatPlayer
 
-from threading import Lock, Thread
+from threading import Lock
 import neat
 import pickle
 import os
@@ -37,10 +32,10 @@ def eval_genomes(genomes, config):
         fitness = player.genome.fitness
         print(fitness, highest_fitness)
 
-        checkHighest(fitness, player.net)
+        check_highest(fitness, player.net)
 
 
-def checkHighest(fitness, net):
+def check_highest(fitness, net):
     fitnessLock.acquire()
     global highest_fitness
 
@@ -48,7 +43,7 @@ def checkHighest(fitness, net):
         highest_fitness = fitness
         # Save network if score improves
         if fitness > 750:
-            pickle.dump(net, open(("pickles/neat-" + str(fitness) + ".pickle"), "wb"))
+            pickle.dump(net, open(("static/pickles/neat-" + str(fitness) + ".pickle"), "wb"))
     fitnessLock.release()
 
 
