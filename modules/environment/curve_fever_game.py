@@ -286,7 +286,7 @@ class CurveFever(object):
                 self.update_actions()
             if np.sum(self.state.alive) <= 0:
                 if np.sum(self.state.alive) < 0:
-                    print("ALIVE SNAKES BELOW 0 FUCK THIS GUY")
+                    print("ALIVE SNAKES BELOW 0")
                 return
 
     def training_tick(self):

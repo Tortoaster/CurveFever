@@ -48,8 +48,8 @@ def checkHighest(fitness, net):
     if fitness > highest_fitness:
         highest_fitness = fitness
         
-        print("Highest fitness:",highest_fitness)
-        pickle.dump(net, open(("pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
+        print("Highest fitness:", highest_fitness)
+        pickle.dump(net, open(("static/pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
     fitnessLock.release()
 
 def run(config_file):
