@@ -1,7 +1,6 @@
 import inspect
 import sys
 import time
-import pygame
 
 import numpy as np
 from typing import List
