@@ -1,6 +1,7 @@
 import inspect
 import sys
 import time
+import pygame
 
 import numpy as np
 from typing import List
@@ -42,37 +43,13 @@ class CurveFever(object):
             self.update_graphics()
 
     ### Running the game methods ###
-    def play(self):
-        if not self.training_mode:
-            players = self.entry()
-        self.initialize(players)
+    def play(self, players=None):
+        self.create_board()
+        self.initialize(players or self.entry())
         self.intro()
         self.loop()
 
-    def initialize(self, players):
-        # if self.gui:
-        #     pygame.init()
-        #     pygame.font.init()
-        #     self.window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        #     pygame.display.set_caption(GAME_NAME)
-        #     self.background_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'whitebg.png'))
-        #     self.arrow_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'arrow.png')).convert()
-        #     self.window.blit(self.background_img, (0, 0))
-
-        self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
-        self.player_radius = PLAYER_RADIUS
-        self.head_radius = HEAD_RADIUS
-        self.player_speed = PLAYER_SPEED
-        self.d_theta = D_THETA
-        self.no_draw_time = NO_DRAW_TIME
-        self.action_sampling_rate = ACTION_SAMPLING_RATE
-        if not self.training_mode:
-            self.players = self.initialize_players(players)
-        else:
-            self.players = players
-        self.reset()
-
-    def entry(self):
+    def create_board(self):
         pygame.init()
         pygame.font.init()
         self.window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -90,6 +67,21 @@ class CurveFever(object):
         # completely fill the surface object with white color
         self.window.fill(WHITE)
 
+    def initialize(self, players):
+        self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
+        self.player_radius = PLAYER_RADIUS
+        self.head_radius = HEAD_RADIUS
+        self.player_speed = PLAYER_SPEED
+        self.d_theta = D_THETA
+        self.no_draw_time = NO_DRAW_TIME
+        self.action_sampling_rate = ACTION_SAMPLING_RATE
+        if not self.training_mode:
+            self.players = self.initialize_players(players)
+        else:
+            self.players = players
+        self.reset()
+
+    def entry(self):
         # set stationary rectangles
         headline_rect = pygame.Rect(20, 25, SCREEN_WIDTH - 40, 130)
         middle_rect = pygame.Rect(20, (2.5 * SCREEN_HEIGHT) // 9, SCREEN_WIDTH - 40, 350)
@@ -448,6 +440,8 @@ class CurveFever(object):
         return int(round(ARENA_X + position[0])), int(round(ARENA_Y + position[1]))
 
     def end(self, lifetime, winner=False):
+        if self.training_mode:
+            return
         self.actions = np.zeros(len(self.players)) + 2
         if not winner is False:
             final_message_1 = f'The winner is player {winner}.'
