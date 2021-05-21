@@ -3,7 +3,6 @@ import sys
 import time
 
 import numpy as np
-from typing import List
 
 from modules.environment.state import State
 from modules.players.player_factory import PlayerFactory
@@ -25,22 +24,6 @@ class CurveFever(object):
         self.background_img = None
         self.arrow_img = None
 
-    def reset(self):
-        self.colors = self.initialize_colors()
-        self.head_colors = [HEAD_COLOR for _ in range(len(self.players))]
-        self.draw_status = [True for _ in range(len(self.players))]
-        self.angles = self.initialize_angles()
-        self.positions = self.initialize_positions()
-        self.state = State(ARENA_SHAPE, self.positions, self.angles, self.colors)
-        self.actions = [STRAIGHT for _ in range(len(self.players))]
-        self.draw_counters = self.initialize_draw_counters()
-        self.no_draw_counters = self.initialize_draw_counters()
-        self.draw_limits = self.initialize_draw_limits()
-        self.counter = 0
-        self.update_states()
-        if not self.training_mode:
-            self.update_graphics()
-
     ### Running the game methods ###
     def play(self):
         if not self.training_mode:
@@ -50,15 +33,6 @@ class CurveFever(object):
         self.loop()
 
     def initialize(self, players):
-        # if self.gui:
-        #     pygame.init()
-        #     pygame.font.init()
-        #     self.window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        #     pygame.display.set_caption(GAME_NAME)
-        #     self.background_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'whitebg.png'))
-        #     self.arrow_img = pygame.image.load(os.path.join(STATIC_ROOT, 'img', 'arrow.png')).convert()
-        #     self.window.blit(self.background_img, (0, 0))
-
         self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
         self.player_radius = PLAYER_RADIUS
         self.head_radius = HEAD_RADIUS
@@ -70,7 +44,23 @@ class CurveFever(object):
             self.players = self.initialize_players(players)
         else:
             self.players = players
-        self.reset()
+
+        self.colors = self.initialize_colors()
+        self.head_colors = [HEAD_COLOR for _ in range(len(self.players))]
+        self.draw_status = [True for _ in range(len(self.players))]
+
+        angles = self.initialize_angles()
+        positions = self.initialize_positions()
+        self.state = State(self.players, ARENA_SHAPE, positions, angles, self.colors)
+
+        self.actions = [STRAIGHT for _ in range(len(self.players))]
+        self.draw_counters = self.initialize_draw_counters()
+        self.no_draw_counters = self.initialize_draw_counters()
+        self.draw_limits = self.initialize_draw_limits()
+        self.counter = 0
+        self.update_states()
+        if not self.training_mode:
+            self.update_graphics()
 
     def entry(self):
         pygame.init()
@@ -124,8 +114,8 @@ class CurveFever(object):
             player_names.append(players_font.render(f'Player {i + 1}', True, BLACK))
 
         # create all rectangular objects
-        headRect_1 = head_1.get_rect()
-        headRect_2 = head_2.get_rect()
+        head_rect_1 = head_1.get_rect()
+        head_rect_2 = head_2.get_rect()
         instructions_1_rect = instructions_1.get_rect()
         instructions_2_rect = instructions_2.get_rect()
         instructions_3_rect = instructions_3.get_rect()
@@ -135,8 +125,8 @@ class CurveFever(object):
             player_rects.append(player.get_rect())
 
         # set the center of the rectangular objects.
-        headRect_1.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 9)
-        headRect_2.center = (SCREEN_WIDTH // 2, (1.8 * SCREEN_HEIGHT) // 9)
+        head_rect_1.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 9)
+        head_rect_2.center = (SCREEN_WIDTH // 2, (1.8 * SCREEN_HEIGHT) // 9)
         instructions_1_rect.center = (SCREEN_WIDTH // 4, (2.9 * SCREEN_HEIGHT) // 9)
         instructions_2_rect.center = (SCREEN_WIDTH // 4 - 12, (8 * SCREEN_HEIGHT) // 9)
         instructions_3_rect.center = ((3 * SCREEN_WIDTH) // 4 + 10, (8 * SCREEN_HEIGHT) // 9)
@@ -145,8 +135,8 @@ class CurveFever(object):
             rect.center = (((i + 1) * SCREEN_WIDTH) // 5, (3.6 * SCREEN_HEIGHT) // 9)
 
         # Writing all text to surface
-        self.window.blit(head_1, headRect_1)
-        self.window.blit(head_2, headRect_2)
+        self.window.blit(head_1, head_rect_1)
+        self.window.blit(head_2, head_rect_2)
         self.window.blit(instructions_1, instructions_1_rect)
         self.window.blit(instructions_2, instructions_2_rect)
         self.window.blit(play, play_rect)
@@ -223,8 +213,8 @@ class CurveFever(object):
             self.window.blit(self.background_img, (0, 0))
             self.draw_arena()
             for i, player in enumerate(self.players):
-                self.rotate_at_center(self.window, self.adjust_pos_to_screen(self.positions[i]), self.arrow_img,
-                                      self.angles[i] * 57 - 90)
+                self.rotate_at_center(self.window, self.adjust_pos_to_screen(self.players[i].position), self.arrow_img,
+                                      self.players[i].angle * 57 - 90)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -248,10 +238,10 @@ class CurveFever(object):
             if not self.counter % self.action_sampling_rate:  # only sample action every few moves
                 self.update_actions()
             ### The actual advancing of the game ###
-            if (time.time() - start) * 1000 < ITERATION_LENGTH:
-                pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
-            if np.sum(self.state.alive) == 1:
-                winner = np.where(self.state.alive)[0][0]
+            # if (time.time() - start) * 1000 < ITERATION_LENGTH:
+            #     pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
+            if np.sum([player.alive for player in self.players]) == 1:
+                winner = np.where([player.alive for player in self.players])[0][0]
             if self.state.is_terminal_state():
                 self.end(self.counter // self.action_sampling_rate, winner)
             pygame.display.update()
@@ -266,9 +256,7 @@ class CurveFever(object):
             self.training_tick()
             if not counter % 5:  # only sample action every few moves
                 self.update_actions()
-            if np.sum(self.state.alive) <= 0:
-                if np.sum(self.state.alive) < 0:
-                    print("ALIVE SNAKES BELOW 0")
+            if np.sum([player.alive for player in self.players]) == 0:
                 return
             # if counter >= 6000:
             #     print("stuck")
@@ -278,11 +266,8 @@ class CurveFever(object):
         self.apply_actions()
         self.update_positions()
         self.update_lives()
-        self.training_update_states()
-
-    def training_update_states(self):
-        for i in range(len(self.players)):
-            self.state.set_angle(i, self.angles[i])
+        self.update_drawing_counters()
+        self.update_states()
 
     def tick(self):
         self.apply_actions()
@@ -296,36 +281,16 @@ class CurveFever(object):
     def update_actions(self):
         """ Gets for all players still alive"""
         for i, player in enumerate(self.players):
-            if self.state.alive[i]:
+            if self.players[i].alive:
                 self.actions[i] = player.get_action(self.state)
 
     def apply_actions(self):
         for i, player in enumerate(self.players):
-            if self.state.alive[i]:
+            if self.players[i].alive:
                 self.apply_action(i, self.actions[i])
 
     def apply_action(self, i, action):
-        self.angles[i] = self.calculate_new_angle(self.angles[i], action)
-
-    ### Player API support methods ###
-    def get_next_state(self, player_ids: List[int], state: State, actions: List[int]) -> State:
-        next_state = State.from_state(state)
-        for _ in range(self.action_sampling_rate):
-            for i, player in enumerate(player_ids):
-                angle = self.calculate_new_angle(state.get_angle(player), actions[i])
-                next_state.set_angle(player, angle)
-                position = self.calculate_new_position(state.get_position(player), angle)
-                next_state.set_position(player, position)
-                next_state.draw_head(self.get_head_position(position, angle))
-                next_state.draw_player(player, True)
-        # TODO: Look into saving in designated memory space by specifying destination of copy.
-        return next_state
-
-    def get_state(self, player_id=0):
-        return self.state
-
-    def get_legal_actions(self, state, player_id):
-        return [RIGHT, LEFT, STRAIGHT]
+        self.players[i].angle = self.calculate_new_angle(self.players[i].angle, action)
 
     ### Drawing related methods ###
     def update_graphics(self):
@@ -333,10 +298,10 @@ class CurveFever(object):
         #     raise Exception(f'Trying to draw graphics in training mode.')
         self.draw_dashboard()
         for i, player in enumerate(self.players):
-            if self.state.alive[i]:
+            if player.alive:
                 # player.update_drawing_counters()
-                position = self.positions[i]
-                head_position = self.get_head_position(position, self.angles[i])
+                position = player.position
+                head_position = self.get_head_position(position, player.angle)
 
                 pygame.draw.circle(self.window, self.head_colors[i], self.adjust_pos_to_screen(head_position),
                                    self.head_radius)
@@ -361,15 +326,14 @@ class CurveFever(object):
 
     def update_states(self):
         for i in range(len(self.players)):
-            self.state.set_angle(i, self.angles[i])
-            self.state.draw_head(self.get_head_position(self.positions[i], self.angles[i]))
+            self.state.set_angle(i, self.players[i].angle)
             self.state.draw_player(i, self.draw_status[i])
 
     def draw_dashboard(self):
         pygame.draw.rect(self.window, WHITE, (0, 0, 150, 720))
         for i, player in enumerate(self.players):
             self.text_display(str(i), 15, 20 + 30 * i, (0, 0, 0))
-            if self.state.alive[i]:
+            if player.alive:
                 pygame.draw.circle(self.window, self.colors[i], (8, 30 + 30 * i), 5)
             else:
                 pygame.draw.circle(self.window, BLACK, (8, 30 + 30 * i), 5)
@@ -389,24 +353,18 @@ class CurveFever(object):
         ds.blit(rotated, (pos[0] - rect.center[0], pos[1] - rect.center[1]))
 
     ### HELP FUNC ###
-    def detect_collision(self, player_id, state, head_pos=0):
-        if head_pos:
-            pos = head_pos
-        else:
-            pos = self.get_head_position(state.get_position(player_id), state.get_angle(player_id))
+    def detect_collision(self, player_id, state):
+        pos = self.get_head_position(state.get_position(player_id), state.get_angle(player_id))
         return self.detect_collision_pos(pos)
 
     def detect_collision_pos(self, pos):
-        state = self.state
         if not self.in_bounds(pos):
             return True
-        pixel = state.get_3d_pixel((int(round(pos[0])), int(round(pos[1]))))
-        for color in state.colors:
-            if not np.any(pixel - color):
-                return True
-        return False
+        pixel = self.state.get_3d_pixel((int(round(pos[0])), int(round(pos[1]))))
+        return not (all(pixel == list(WHITE)) or all(pixel == list(BLACK)))
 
-    def in_bounds(self, pos):
+    @staticmethod
+    def in_bounds(pos):
         return 0 <= int(round(pos[0])) < ARENA_WIDTH and 0 <= int(round(pos[1])) < ARENA_HEIGHT
 
     def get_head_position(self, position, angle):
@@ -422,17 +380,16 @@ class CurveFever(object):
         return previous_angle  # The chosen action was straight
 
     def update_positions(self):
-        for i in range(len(self.players)):
-            if self.state.alive[i]:
-                pos = self.calculate_new_position(self.positions[i], self.angles[i])
-                self.positions[i] = pos  # update game positions
-                self.state.set_position(i, pos)  # update state positions
+        for i, player in enumerate(self.players):
+            if player.alive:
+                pos = self.calculate_new_position(player.position, player.angle)
+                player.position = pos
 
     def update_lives(self):
-        for i in range(len(self.players)):
-            if self.state.alive[i]:
+        for i, player in enumerate(self.players):
+            if player.alive:
                 if self.detect_collision(i, self.state):
-                    self.state.alive[i] = False
+                    player.alive = False
 
     def calculate_new_position(self, previous_position, angle):
         dx = np.cos(angle) * self.player_speed

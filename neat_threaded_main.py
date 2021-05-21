@@ -41,10 +41,10 @@ class genome(threading.Thread):
         self.game.training_loop()
         player = max(self.players, key=lambda k: k.genome.fitness)
         fitness = player.genome.fitness
-        checkHighest(fitness, player.net)
+        check_highest(fitness, player.net)
 
 
-def checkHighest(fitness, net):
+def check_highest(fitness, net):
     fitnessLock.acquire()
     global highest_fitness
 

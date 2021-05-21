@@ -40,15 +40,6 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-# 2D Colors
-BLACK_2D = 0
-WHITE_2D = 1
-HEAD_2D = 1
-RED_2D = 2
-GREEN_2D = 3
-BLUE_2D = 4
-YELLOW_2D = 5
-
 # Actions
 RIGHT = 0
 LEFT = 1
