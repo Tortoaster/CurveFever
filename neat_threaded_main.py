@@ -50,15 +50,9 @@ def checkHighest(fitness, net):
 
     if fitness > highest_fitness:
         highest_fitness = fitness
-<<<<<<< HEAD:neatThreadMain.py
         
         print("Highest fitness:", highest_fitness)
         pickle.dump(net, open(("static/pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
-=======
-
-        print("Highest fitness:", highest_fitness)
-        pickle.dump(net, open(("pickles/neat-" + str(fitness) + ".pickle"), "wb"))
->>>>>>> 772aac36a431dac6b3374964af324df89fb2ec5b:neat_threaded_main.py
     fitnessLock.release()
 
 
