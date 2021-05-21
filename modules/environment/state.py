@@ -19,8 +19,8 @@ class State:
 
         shape_3d = shape[0] + (self.margin * 2), shape[1] + (self.margin * 2), shape[2]
         shape_2d = (shape[0], shape[1])
-        self._rgb_board = np.ones(shape_3d) * WHITE
-        self._board = np.ones(shape_2d) * WHITE_2D
+        self._rgb_board = np.ones(shape_3d) * BLACK
+        self._board = np.ones(shape_2d) * BLACK_2D
         self.reset_arena()
         self.colors = colors
         self._positions = positions

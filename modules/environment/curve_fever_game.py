@@ -18,9 +18,10 @@ class CurveFever(object):
     legal_actions = (0, 1, 2)
     colors = [PURPLE, BLUE, RED, YELLOW]
 
-    def __init__(self, training_mode=False):
+    def __init__(self, training_mode=False, gui=True):
         self.training_mode = training_mode
-        # self.gui = gui
+        self.gui = gui
+        
         self.window = None
         self.background_img = None
         self.arrow_img = None
@@ -38,7 +39,7 @@ class CurveFever(object):
         self.draw_limits = self.initialize_draw_limits()
         self.counter = 0
         self.update_states()
-        if not self.training_mode:
+        if self.gui:
             self.update_graphics()
 
     ### Running the game methods ###
@@ -47,6 +48,8 @@ class CurveFever(object):
         self.initialize(players or self.entry())
         if not self.training_mode:
             self.intro()
+        else:
+            self.draw_arena()
         self.loop()
 
     def create_board(self):
@@ -63,8 +66,6 @@ class CurveFever(object):
         self.window.blit(self.background_img, (0, 0))
         # set the pygame window name
         pygame.display.set_caption(GAME_NAME)
-
-        self.draw_arena()
 
     def initialize(self, players):
         self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
@@ -280,7 +281,7 @@ class CurveFever(object):
         self.update_positions()
         self.update_lives()
         self.update_drawing_counters()
-        if not self.training_mode:
+        if self.gui:
             self.update_graphics()
         self.update_states()
 
@@ -366,8 +367,6 @@ class CurveFever(object):
                 pygame.draw.circle(self.window, BLACK, (8, 30 + 30 * i), 5)
 
     def draw_arena(self):
-        if not self.training_mode:
-            pygame.draw.rect(self.window, BLACK, (ARENA_X, ARENA_Y, ARENA_WIDTH, ARENA_HEIGHT))
         self.state.reset_arena()
 
     def text_display(self, text, x, y, color):
@@ -439,7 +438,7 @@ class CurveFever(object):
         return int(round(ARENA_X + position[0])), int(round(ARENA_Y + position[1]))
 
     def end(self, lifetime, winner=False):
-        if self.training_mode:
+        if self.gui:
             return
         self.actions = np.zeros(len(self.players)) + 2
         if not winner is False:

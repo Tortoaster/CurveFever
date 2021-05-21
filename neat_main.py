@@ -15,7 +15,7 @@ def eval_genomes(genomes, config):
     neat_players = []
     for i in range(0, len(genomes), 4):
         # for genome_id, genome in genomes:
-        game = CurveFever(training_mode=True)
+        game = CurveFever(training_mode=True, gui=True)
         player_id = 0
         tmp_players = []
         for genome_id, genome in genomes[i:i + 4]:
