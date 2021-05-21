@@ -45,7 +45,8 @@ class CurveFever(object):
     def play(self, players=None):
         self.create_board()
         self.initialize(players or self.entry())
-        self.intro()
+        if not self.training_mode:
+            self.intro()
         self.loop()
 
     def create_board(self):
@@ -63,8 +64,7 @@ class CurveFever(object):
         # set the pygame window name
         pygame.display.set_caption(GAME_NAME)
 
-        # completely fill the surface object with white color
-        self.window.fill(WHITE)
+        self.draw_arena()
 
     def initialize(self, players):
         self.circles = [CIRCLE_RADIUS_1, CIRCLE_RADIUS_2, CIRCLE_RADIUS_3, CIRCLE_RADIUS_4]
