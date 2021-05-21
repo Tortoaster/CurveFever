@@ -8,13 +8,15 @@ import os
 fitnessLock = threading.Lock()
 highest_fitness = 0
 
+
 def eval_genomes(genomes, config):
-    threads = [genome(genomes[i:i+4], i, i+4, config) for i in range(0,len(genomes),4)]
+    threads = [genome(genomes[i:i + 4], i, i + 4, config) for i in range(0, len(genomes), 4)]
     for t in threads:
         t.start()
     [t.join() for t in threads]
 
-class genome (threading.Thread):
+
+class genome(threading.Thread):
     def __init__(self, genomes, begin, end, config):
         threading.Thread.__init__(self)
         self.genomes = genomes
@@ -37,9 +39,10 @@ class genome (threading.Thread):
         print("Range", self.begin, self.end)
         self.game.initialize(self.players)
         self.game.training_loop()
-        player = max(self.players, key=lambda k:k.genome.fitness)
+        player = max(self.players, key=lambda k: k.genome.fitness)
         fitness = player.genome.fitness
         checkHighest(fitness, player.net)
+
 
 def checkHighest(fitness, net):
     fitnessLock.acquire()
@@ -47,10 +50,17 @@ def checkHighest(fitness, net):
 
     if fitness > highest_fitness:
         highest_fitness = fitness
+<<<<<<< HEAD:neatThreadMain.py
         
         print("Highest fitness:", highest_fitness)
         pickle.dump(net, open(("static/pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
+=======
+
+        print("Highest fitness:", highest_fitness)
+        pickle.dump(net, open(("pickles/neat-" + str(fitness) + ".pickle"), "wb"))
+>>>>>>> 772aac36a431dac6b3374964af324df89fb2ec5b:neat_threaded_main.py
     fitnessLock.release()
+
 
 def run(config_file):
     """
@@ -59,8 +69,8 @@ def run(config_file):
     :return: None
     """
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_file)
+                                neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                config_file)
 
     # Create the population, which is the top-level object for a NEAT run.
     p = neat.Population(config)
@@ -69,7 +79,7 @@ def run(config_file):
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
-    #p.add_reporter(neat.Checkpointer(5))
+    # p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 50 generations.
     winner = p.run(eval_genomes, 50)
@@ -82,5 +92,3 @@ if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'static/models/config.txt')
     run(config_path)
-
-

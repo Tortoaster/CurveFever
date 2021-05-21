@@ -1,7 +1,9 @@
-import numpy as np
 import abc
-from static.settings import *
+
 import copy
+import numpy as np
+
+from static.settings import *
 
 
 class State:

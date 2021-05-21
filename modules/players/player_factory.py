@@ -1,10 +1,11 @@
-from modules.players.regular_player import RegularHumanPlayer
-from modules.players.drl_player import DRLPlayer
-from modules.players.random_player import RandomPlayer
-from modules.players.alpha_beta_player import AlphaBetaPlayer
-from modules.players.neat_player import NeatPlayer
-from static.settings import *
 import pygame
+
+from modules.players.alpha_beta_player import AlphaBetaPlayer
+from modules.players.drl_player import DRLPlayer
+from modules.players.neat_player import NeatPlayer
+from modules.players.random_player import RandomPlayer
+from modules.players.regular_player import RegularHumanPlayer
+from static.settings import *
 
 ARROWS_RIGHT = pygame.K_RIGHT
 ARROWS_LEFT = pygame.K_LEFT

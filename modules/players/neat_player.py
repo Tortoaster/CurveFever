@@ -1,18 +1,20 @@
 import math
-import numpy as np
-from static.settings import *
-from modules.players.player import Player
-import neat
 import pickle
+
+import numpy as np
+
+from modules.players.player import Player
+from static.settings import *
 
 MAX_RAY_LENGTH = math.sqrt(ARENA_WIDTH ** 2 + ARENA_HEIGHT ** 2)
 SPACING = PLAYER_RADIUS * 2
-RAYS = 7
+RAYS = 9
 SPREAD = 30
 
+
 class NeatPlayer(Player):
-    def __init__(self, player_id, game, genome = None, net = None):
-        super().__init__(player_id, game) 
+    def __init__(self, player_id, game, genome=None, net=None):
+        super().__init__(player_id, game)
 
         self.training = game.training_mode
         self.genome = genome
@@ -33,13 +35,8 @@ class NeatPlayer(Player):
             # Increase fitness each time this function is called
             self.genome.fitness += 1
 
-        if outputs[0] > 0.5 or outputs[1] > 0.5:
-            if outputs[0] > outputs[1]:
-                return LEFT
-            else:
-                return RIGHT
-        return STRAIGHT
-        
+        return outputs.index(max(outputs))
+
     def set_game(self, game):
         self.game = game
 
@@ -54,7 +51,7 @@ class NeatPlayer(Player):
             hy = np.sin(angle) * SPACING * index
             pos = [hx + position[0], - hy + position[1]]
 
-            if self.game.detect_collision(self.id, self.game.state, pos):
+            if self.game.detect_collision_pos(pos):
                 return index
 
             # pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
