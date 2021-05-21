@@ -237,9 +237,9 @@ class CurveFever(object):
             self.tick()
             if not self.counter % self.action_sampling_rate:  # only sample action every few moves
                 self.update_actions()
-            ### The actual advancing of the game ###
-            # if (time.time() - start) * 1000 < ITERATION_LENGTH:
-            #     pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
+            ## The actual advancing of the game ###
+            if (time.time() - start) * 1000 < ITERATION_LENGTH:
+                pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
             if np.sum([player.alive for player in self.players]) == 1:
                 winner = np.where([player.alive for player in self.players])[0][0]
             if self.state.is_terminal_state():

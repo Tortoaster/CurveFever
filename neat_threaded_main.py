@@ -1,4 +1,5 @@
 from modules.environment.curve_fever_game import CurveFever
+from modules.players.player_factory import PlayerFactory
 from modules.players.neat_player import NeatPlayer
 import threading
 import neat
@@ -10,10 +11,12 @@ highest_fitness = 0
 
 
 def eval_genomes(genomes, config):
-    threads = [genome(genomes[i:i + 4], i, i + 4, config) for i in range(0, len(genomes), 4)]
+    numGen = 2
+    threads = [genome(genomes[i:i + numGen], i, i + numGen, config) for i in range(0, len(genomes), numGen)]
     for t in threads:
         t.start()
     [t.join() for t in threads]
+    print('\n')
 
 
 class genome(threading.Thread):
@@ -22,17 +25,20 @@ class genome(threading.Thread):
         self.genomes = genomes
         self.game = CurveFever(training_mode=True)
         self.config = config
-        self.players = self.create_players()
         self.begin = begin
         self.end = end
+        self.players = self.create_players()
 
     def create_players(self):
         player_id = 0
         tmp = []
         for _, genome in self.genomes:
-            net = neat.nn.FeedForwardNetwork.create(genome, self.config)
+            net = neat.nn.RecurrentNetwork.create(genome, self.config)
             tmp.append(NeatPlayer(player_id, self.game, genome, net))
             player_id += 1
+        
+        # tmp.append(PlayerFactory.create_player('d', self.begin+1, self.game))
+        tmp.append(PlayerFactory.create_player('ab', self.begin+2, self.game))
         return tmp
 
     def run(self):
@@ -52,7 +58,8 @@ def check_highest(fitness, net):
         highest_fitness = fitness
         
         print("Highest fitness:", highest_fitness)
-        pickle.dump(net, open(("static/pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
+        if fitness > 200:
+            pickle.dump(net, open(("static/picklesC/neat-" + str(fitness) +  ".pickle"), "wb"))
     fitnessLock.release()
 
 
@@ -76,7 +83,7 @@ def run(config_file):
     # p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 50 generations.
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes)
 
     # show final stats
     print('\nBest genome:\n{!s}'.format(winner))
@@ -84,5 +91,5 @@ def run(config_file):
 
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'static/models/config.txt')
+    config_path = os.path.join(local_dir, 'static/picklesC/config.txt')
     run(config_path)

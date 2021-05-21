@@ -42,8 +42,8 @@ def check_highest(fitness, net):
     if fitness > highest_fitness:
         highest_fitness = fitness
         # Save network if score improves
-        if fitness > 750:
-            pickle.dump(net, open(("static/pickles/neat-" + str(fitness) + ".pickle"), "wb"))
+        # if fitness > 750:
+        pickle.dump(net, open(("static/picklesA/neat-" + str(fitness) + ".pickle"), "wb"))
     fitnessLock.release()
 
 
@@ -75,5 +75,5 @@ def run(config_file):
 
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, 'static/models/config.txt')
+    config_path = os.path.join(local_dir, 'static/picklesA/config.txt')
     run(config_path)

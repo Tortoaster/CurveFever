@@ -8,7 +8,7 @@ from static.settings import *
 
 MAX_RAY_LENGTH = math.sqrt(ARENA_WIDTH ** 2 + ARENA_HEIGHT ** 2)
 SPACING = PLAYER_RADIUS * 2
-RAYS = 9
+RAYS = 12
 SPREAD = 30
 
 
@@ -20,7 +20,7 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("pickles/neat-2488.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/picklesB/neat-804.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
@@ -29,13 +29,19 @@ class NeatPlayer(Player):
         # The distances of the rays
         inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
         # Get the ouputs from the network
-        outputs = self.net.activate(inputs)
+        output = self.net.activate(inputs)[0]
 
         if self.training:
             # Increase fitness each time this function is called
             self.genome.fitness += 1
 
-        return outputs.index(max(outputs))
+        if output <= -0.5:
+            return LEFT
+        if output >= 0.5:
+            return RIGHT
+        return STRAIGHT
+
+        # return outputs.index(max(outputs))
 
     def set_game(self, game):
         self.game = game
