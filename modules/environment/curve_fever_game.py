@@ -277,6 +277,8 @@ class CurveFever(object):
         self.update_positions()
         self.update_lives()
         self.training_update_states()
+
+    def training_update_states(self):
         for i in range(len(self.players)):
             self.state.set_angle(i, self.angles[i])
 
@@ -354,10 +356,6 @@ class CurveFever(object):
                     self.no_draw_counters[i] = 0
                     self.draw_limits[i] = self.initialize_draw_limit()
                     self.draw_status[i] = True
-
-    def training_update_states(self):
-        for i in range(len(self.players)):
-            self.state.set_angle(i, self.angles[i])
 
     def update_states(self):
         for i in range(len(self.players)):
