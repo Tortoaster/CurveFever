@@ -25,6 +25,11 @@ class NeatPlayer(Player):
         self.total_time = 0
         self.record = 0
 
+        self.alive = True
+        self.action = None
+        self.position = None
+        self.angle = None
+
     def get_action(self, state):
         # The distances of the rays
         inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]

@@ -23,6 +23,7 @@ class AlphaBetaPlayer(Player):
         self.first_round = True
         self.states_evaluated = 0
         self.successors_generated = 0
+        self.alive = True
 
     def get_action(self, state):
         state_copy = State.from_state(state)

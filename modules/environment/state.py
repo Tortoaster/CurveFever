@@ -23,9 +23,9 @@ class State:
         self._board = np.ones(shape_2d) * WHITE_2D
         self.reset_arena()
         self.colors = colors
-        self._positions = positions
-        self.alive = [True for _ in range(len(positions))]
-        self._angles = angles
+        #self._positions = positions
+        #self.alive = [True for _ in range(len(positions))]
+        #self._angles = angles
         self.counts = [0 for _ in angles]
 
     def get_3d_pixel(self, coord):
@@ -114,7 +114,7 @@ class State:
         circle[circle[..., 1] >= ARENA_HEIGHT, 1] = ARENA_HEIGHT - 1
         return np.round(circle).astype(np.int)
 
-    def draw_player(self, player_id, use_color=False):
+    def draw_player(self, player, use_color=False):
         self.counts[player_id] += 1
         rgb_color = self.colors[player_id] if use_color else BLACK
         color = player_id + 2 if use_color else BLACK_2D

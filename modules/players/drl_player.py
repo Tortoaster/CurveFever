@@ -16,6 +16,8 @@ class DRLPlayer(Player):
         self._net = model
         self.predictions = 0
         self.total_time = 0
+        self.alive = True
+        
 
     def get_action(self, state):
         # if self.predictions > 0 and not self.predictions % 100:
