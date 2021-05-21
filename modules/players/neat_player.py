@@ -26,13 +26,15 @@ class NeatPlayer(Player):
         self.record = 0
 
         self.alive = True
-        self.action = None
+        self.action = STRAIGHT
         self.position = None
         self.angle = None
+        self.count = 0
+        self.color = None
 
     def get_action(self, state):
         # The distances of the rays
-        inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
+        inputs = [self.cast_ray((ray_angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for ray_angle in range(RAYS)]
         # Get the ouputs from the network
         outputs = self.net.activate(inputs)
 
@@ -45,16 +47,16 @@ class NeatPlayer(Player):
     def set_game(self, game):
         self.game = game
 
-    def cast_ray(self, angle):
-        position = self.game.state.get_position(self.id)
-        angle = self.game.state.get_angle(self.id) + (angle / 180 * math.pi)
+    def cast_ray(self, ray_angle):
+        # position = self.game.state.get_position(self.id)
+        angle = self.angle + (ray_angle / 180 * math.pi)
 
         index = 1
         while True:
             index += 1
             hx = np.cos(angle) * SPACING * index
             hy = np.sin(angle) * SPACING * index
-            pos = [hx + position[0], - hy + position[1]]
+            pos = [hx + self.position[0], - hy + self.position[1]]
 
             if self.game.detect_collision_pos(pos):
                 return index

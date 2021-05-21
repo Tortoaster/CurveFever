@@ -13,7 +13,13 @@ class RegularHumanPlayer(Player):
         self.right = right
         self.left = left
         self.temp = 0
+
         self.alive = True
+        self.action = STRAIGHT
+        self.position = None
+        self.angle = None
+        self.count = 0
+        self.color = None
 
     def get_action(self, state):
         keys = pygame.key.get_pressed()

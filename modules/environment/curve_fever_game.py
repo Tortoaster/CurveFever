@@ -30,10 +30,12 @@ class CurveFever(object):
         self.colors = self.initialize_colors()
         self.head_colors = [HEAD_COLOR for _ in range(len(self.players))]
         self.draw_status = [True for _ in range(len(self.players))]
-        self.angles = self.initialize_angles()
-        self.positions = self.initialize_positions()
-        self.state = State(ARENA_SHAPE, self.positions, self.angles, self.colors)
-        self.actions = [STRAIGHT for _ in range(len(self.players))]
+        #self.angles = 
+        self.initialize_angles()
+        #self.positions = 
+        self.initialize_positions()
+        self.state = State(ARENA_SHAPE, self.colors)
+        #self.actions = [STRAIGHT for _ in range(len(self.players))]
         self.draw_counters = self.initialize_draw_counters()
         self.no_draw_counters = self.initialize_draw_counters()
         self.draw_limits = self.initialize_draw_limits()
@@ -216,8 +218,8 @@ class CurveFever(object):
             self.window.blit(self.background_img, (0, 0))
             self.draw_arena()
             for i, player in enumerate(self.players):
-                self.rotate_at_center(self.window, self.adjust_pos_to_screen(self.positions[i]), self.arrow_img,
-                                      self.angles[i] * 57 - 90)
+                self.rotate_at_center(self.window, self.adjust_pos_to_screen(player.position), self.arrow_img,
+                                      player.angle * 57 - 90)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -245,7 +247,7 @@ class CurveFever(object):
                 pygame.time.wait(int(ITERATION_LENGTH - ((time.time() - start) * 1000)))
             if self.number_alive_players() == 1:
                 winner = self.get_winner()
-            if self.state.is_terminal_state():
+            if self.number_alive_players() < 1:
                 self.end(self.counter // self.action_sampling_rate, winner)
             pygame.display.update()
 
@@ -287,7 +289,7 @@ class CurveFever(object):
         self.apply_actions()
         self.update_positions()
         self.update_lives()
-        self.training_update_states()
+        # self.training_update_states()
 
     def tick(self):
         self.apply_actions()
@@ -366,8 +368,8 @@ class CurveFever(object):
 
     def update_states(self):
         for i, player in enumerate(self.players):
-            player.angle = self.angles[i]
-            self.state.draw_head(self.get_head_position(self.positions[i], self.angles[i]))
+            # player.angle = self.angles[i]
+            self.state.draw_head(self.get_head_position(player.position, player.angle))
             self.state.draw_player(player, self.draw_status[i])
 
     def draw_dashboard(self):
@@ -399,7 +401,7 @@ class CurveFever(object):
             pos = head_pos
         else:
             pos = self.get_head_position(player.position, player.angle)
-        return self.detect_collision_pos(pos)
+        return self.detect_collision_pos_alt(pos)
 
     def detect_collision_pos(self, pos):
         state = self.state
@@ -409,6 +411,15 @@ class CurveFever(object):
         for color in state.colors:
             if not np.any(pixel - color):
                 return True
+        return False
+
+    def detect_collision_pos_alt(self, pos):
+        state = self.state
+        if not self.in_bounds(pos):
+            return True
+        pixel = state.get_3d_pixel((int(round(pos[0])), int(round(pos[1]))))
+        if pixel != BLACK:
+            return True
         return False
 
     def in_bounds(self, pos):
@@ -429,8 +440,7 @@ class CurveFever(object):
     def update_positions(self):
         for i, player in enumerate(self.players):
             if player.alive:
-                pos = self.calculate_new_position(self.positions[i], self.angles[i])
-                self.positions[i] = pos
+                pos = self.calculate_new_position(player.position, player.angle)
                 player.position = pos
 
     # def update_positions(self):
@@ -461,10 +471,10 @@ class CurveFever(object):
 
     def end(self, lifetime, winner = None):
         self.actions = np.zeros(len(self.players)) + 2
-        if not winner:
+        if winner:
             final_message_1 = f'The winner is player {winner.id}.'
             final_message_2 = f'lifetime = {lifetime} steps.'
-            color = self.colors[winner]
+            color = winner.color
         else:
             final_message_1 = 'No winners in this game'
             final_message_2 = f'better luck next time.'
@@ -569,7 +579,9 @@ class CurveFever(object):
 
 
     def initialize_angles(self):
-        return np.random.uniform(0, 2 * np.pi, len(self.players))
+        angles = np.random.uniform(0, 2 * np.pi, len(self.players))
+        for i, player in enumerate(self.players):
+            player.angle = angles[i]
 
     def initialize_positions(self):
         width_margin = ARENA_WIDTH // 5
@@ -577,14 +589,13 @@ class CurveFever(object):
         xx = np.random.uniform(width_margin, ARENA_WIDTH - width_margin, len(self.players))
         yy = np.random.uniform(height_margin, ARENA_HEIGHT - height_margin, len(self.players))
 
-        positions = []
+        # positions = zip(xx, yy)
         for i, player in enumerate(self.players):
             player.position = (xx[i], yy[i])
-            positions.append((xx[i], yy[i]))
-
-        return positions
 
     def initialize_colors(self):
+        for i, player in enumerate(self.players):
+            player.color = CurveFever.colors[i]
         return CurveFever.colors[:len(self.players)]
 
     def initialize_draw_counters(self):

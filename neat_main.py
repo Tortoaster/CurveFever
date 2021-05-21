@@ -25,8 +25,9 @@ def eval_genomes(genomes, config):
             tmp_players.append(player)
             player_id = player_id + 1
         print("Range", i, i + 4)
-        game.initialize(tmp_players)
-        game.training_loop()
+        game.play(tmp_players)
+        # game.initialize(tmp_players)
+        # game.training_loop()
 
         player = max(neat_players, key=lambda k: k.genome.fitness)
         fitness = player.genome.fitness

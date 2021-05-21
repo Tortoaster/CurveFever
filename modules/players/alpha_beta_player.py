@@ -23,11 +23,17 @@ class AlphaBetaPlayer(Player):
         self.first_round = True
         self.states_evaluated = 0
         self.successors_generated = 0
+
         self.alive = True
+        self.action = None
+        self.position = None
+        self.angle = None
+        self.count = 0
+        self.color = None
 
     def get_action(self, state):
         state_copy = State.from_state(state)
-        if 1 < len(state_copy.alive) < self.n_of_opp or self.first_round:
+        if 1 < self.game.number_alive_players() < self.n_of_opp or self.first_round:
             self.update_opponents(state_copy)
         values = []
         initial_position = self.get_initial_positions([self.id], state_copy)
@@ -152,11 +158,15 @@ class AlphaBetaPlayer(Player):
 
     def calc_fill_value(self, state):
         ab_heuristic = AlphaBetaHeuristic(self, self.game, state, self.opponents)
-        positions = state.get_all_positions()
-        angles = state.get_all_angles()
+        positions = self.get_all_positions()
+        angles = self.get_all_angles()
         score, euclidean_distance = ab_heuristic.score_function(positions, angles)
         return score, euclidean_distance
 
+    def get_all_angles(self):
+        return [player.angle  for player in self.game.players]
+    def get_all_positions(self):
+        return [player.position  for player in self.game.players]
 
 NEGATIVE_SCORE = 1000 * -127
 SUB_SAMPLE_FACTOR = 1
