@@ -6,9 +6,9 @@ import numpy as np
 from modules.players.player import Player
 from static.settings import *
 
-MAX_RAY_LENGTH = 20
-SPACING = PLAYER_RADIUS * 2
-RAYS = 20
+MAX_RAY_LENGTH = 30
+SPACING = PLAYER_RADIUS * 1.5
+RAYS = 21
 SPREAD = 18
 
 
@@ -20,7 +20,7 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("static/pickles/neat-239.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/pickles/neat-870.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
@@ -28,23 +28,22 @@ class NeatPlayer(Player):
     def get_action(self, state):
         # The distances of the rays
         # inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
-        angles = [-130, -111, -93, -76, -60, -55, -41, -28, -16, -5, 5, 16, 28, 41, 55, 60, 76, 93, 111, 130]
+        angles = [-145, -126, -108, -91, -75, -60, -46, -33, -21, -10, 0, 10, 21, 33, 46, 60, 75, 91, 108, 126, 145]
         inputs = [self.cast_ray(angles[index]) / MAX_RAY_LENGTH for index in range(RAYS)]
         # Get the outputs from the network
         # direction = self.net.activate(inputs)[0]
-        outputs_left = self.net.activate(inputs[RAYS // 2:])[0]
-        outputs_right = -self.net.activate(list(reversed(inputs[:RAYS // 2])))[0]
+        outputs_left = self.net.activate(list(reversed(inputs[:RAYS // 2 + 1])))[0]
+        outputs_right = -self.net.activate(inputs[RAYS // 2:])[0]
         direction = outputs_right + outputs_left
 
         if self.training:
             # Increase fitness each time this function is called
             self.genome.fitness += 1
 
-        if direction < -0.1:
+        if direction < 0:
             return LEFT
-        elif direction > 0.1:
+        else:
             return RIGHT
-        return STRAIGHT
 
     def cast_ray(self, angle):
         position = self.game.state.get_position(self.id)
@@ -58,5 +57,6 @@ class NeatPlayer(Player):
             if self.game.detect_collision_pos(pos):
                 return distance
 
-            pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
+            # if not self.training:
+            #     pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
         return MAX_RAY_LENGTH
