@@ -6,7 +6,7 @@ import numpy as np
 from modules.players.player import Player
 from static.settings import *
 
-MAX_RAY_LENGTH = 150
+MAX_RAY_LENGTH = 20
 SPACING = PLAYER_RADIUS * 2
 RAYS = 20
 SPREAD = 18
@@ -20,7 +20,7 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("static/pickles/neat-656.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/pickles/neat-239.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
@@ -50,7 +50,7 @@ class NeatPlayer(Player):
         position = self.game.state.get_position(self.id)
         angle = self.game.state.get_angle(self.id) + (angle / 180 * math.pi)
 
-        for distance in range(MAX_RAY_LENGTH):
+        for distance in range(1, MAX_RAY_LENGTH):
             hx = np.cos(angle) * SPACING * distance
             hy = np.sin(angle) * SPACING * distance
             pos = [hx + position[0], - hy + position[1]]
@@ -58,4 +58,5 @@ class NeatPlayer(Player):
             if self.game.detect_collision_pos(pos):
                 return distance
 
-            # pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
+            pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
+        return MAX_RAY_LENGTH
