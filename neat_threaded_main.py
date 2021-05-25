@@ -11,12 +11,13 @@ PLAYERS = 4
 
 
 def eval_genomes(genomes, config):
-    threads = [Genome(genomes[i:i + PLAYERS], i, i + PLAYERS, config) for i in range(0, len(genomes), PLAYERS)]
+    threads = [genome(genomes[i:i + PLAYERS], i, i + PLAYERS, config) for i in range(0, len(genomes), PLAYERS)]
     for t in threads:
         t.start()
+    [t.join() for t in threads]
 
 
-class Genome(threading.Thread):
+class genome(threading.Thread):
     def __init__(self, genomes, begin, end, config):
         threading.Thread.__init__(self)
         self.genomes = genomes
@@ -39,7 +40,7 @@ class Genome(threading.Thread):
         print("Range", self.begin, self.end)
         self.game.initialize(self.players)
         self.game.training_loop()
-        player = max(self.players, key=lambda k: k.Genome.fitness)
+        player = max(self.players, key=lambda k: k.genome.fitness)
         fitness = player.genome.fitness
         check_highest(fitness, player.net)
 
@@ -79,7 +80,7 @@ def run(config_file):
     winner = p.run(eval_genomes)
 
     # show final stats
-    print('\nBest Genome:\n{!s}'.format(winner))
+    print('\nBest genome:\n{!s}'.format(winner))
 
 
 if __name__ == '__main__':

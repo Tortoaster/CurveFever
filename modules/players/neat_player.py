@@ -8,8 +8,8 @@ from static.settings import *
 
 MAX_RAY_LENGTH = math.sqrt(ARENA_WIDTH ** 2 + ARENA_HEIGHT ** 2)
 SPACING = PLAYER_RADIUS * 2
-RAYS = 9
-SPREAD = 30
+RAYS = 20
+SPREAD = 18
 
 
 class NeatPlayer(Player):
@@ -20,25 +20,31 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("pickles/neat-2488.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/pickles/neat-232.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
 
     def get_action(self, state):
         # The distances of the rays
-        inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
-        # Get the ouputs from the network
-        outputs = self.net.activate(inputs)
+        # inputs = [self.cast_ray((angle - RAYS // 2) * SPREAD) / MAX_RAY_LENGTH for angle in range(RAYS)]
+        angles = [-130, -111, -93, -76, -60, -55, -41, -28, -16, -5, 5, 16, 28, 41, 55, 60, 76, 93, 111, 130]
+        inputs = [self.cast_ray(angles[index]) / MAX_RAY_LENGTH for index in range(RAYS)]
+        # Get the outputs from the network
+        # direction = self.net.activate(inputs)[0]
+        outputs_left = self.net.activate(inputs[RAYS // 2:])[0]
+        outputs_right = -self.net.activate(list(reversed(inputs[:RAYS // 2])))[0]
+        direction = outputs_right + outputs_left
 
         if self.training:
             # Increase fitness each time this function is called
             self.genome.fitness += 1
 
-        return outputs.index(max(outputs))
-
-    def set_game(self, game):
-        self.game = game
+        if direction < -0.1:
+            return LEFT
+        elif direction > 0.1:
+            return RIGHT
+        return STRAIGHT
 
     def cast_ray(self, angle):
         position = self.game.state.get_position(self.id)
