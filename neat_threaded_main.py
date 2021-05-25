@@ -7,16 +7,16 @@ import os
 
 fitnessLock = threading.Lock()
 highest_fitness = 0
+PLAYERS = 4
 
 
 def eval_genomes(genomes, config):
-    threads = [genome(genomes[i:i + 4], i, i + 4, config) for i in range(0, len(genomes), 4)]
+    threads = [Genome(genomes[i:i + PLAYERS], i, i + PLAYERS, config) for i in range(0, len(genomes), PLAYERS)]
     for t in threads:
         t.start()
-    [t.join() for t in threads]
 
 
-class genome(threading.Thread):
+class Genome(threading.Thread):
     def __init__(self, genomes, begin, end, config):
         threading.Thread.__init__(self)
         self.genomes = genomes
@@ -39,7 +39,7 @@ class genome(threading.Thread):
         print("Range", self.begin, self.end)
         self.game.initialize(self.players)
         self.game.training_loop()
-        player = max(self.players, key=lambda k: k.genome.fitness)
+        player = max(self.players, key=lambda k: k.Genome.fitness)
         fitness = player.genome.fitness
         check_highest(fitness, player.net)
 
@@ -52,7 +52,7 @@ def check_highest(fitness, net):
         highest_fitness = fitness
         
         print("Highest fitness:", highest_fitness)
-        pickle.dump(net, open(("static/pickles/neat-" + str(fitness) +  ".pickle"), "wb"))
+        pickle.dump(net, open(("static/pickles/neat-" + str(fitness) + ".pickle"), "wb"))
     fitnessLock.release()
 
 
@@ -76,10 +76,10 @@ def run(config_file):
     # p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 50 generations.
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes)
 
     # show final stats
-    print('\nBest genome:\n{!s}'.format(winner))
+    print('\nBest Genome:\n{!s}'.format(winner))
 
 
 if __name__ == '__main__':
