@@ -6,12 +6,14 @@ import numpy as np
 
 from modules.environment.state import State
 from modules.players.player_factory import PlayerFactory
+from modules.players.neat_player import NeatPlayer
 from static.settings import *
 
 current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
+KILL_FITNESS = 300
 
 class CurveFever(object):
     legal_actions = (0, 1, 2)
@@ -251,7 +253,7 @@ class CurveFever(object):
         counter = 0
         while not winner:
             if counter % 60 == 0:
-                print('.', end='')
+                print('.', end='', flush=True)
             counter += 1
             self.training_tick()
             if not counter % 5:  # only sample action every few moves
@@ -385,12 +387,20 @@ class CurveFever(object):
                 pos = self.calculate_new_position(player.position, player.angle)
                 player.position = pos
 
+    def death_fitness(self, dead_player):
+        pos1 = dead_player.position
+        for player in filter(lambda p: isinstance(p, NeatPlayer), self.players):
+            pos2 = player.position
+            if player.alive and self.distance_between_two_pos(pos1, pos2) < 50 and player.genome:
+                player.genome.fitness += KILL_FITNESS
+
     def update_lives(self):
         for i, player in enumerate(self.players):
             if player.alive:
                 if self.detect_collision(i, self.state):
                     player.alive = False
-
+                    self.death_fitness(player)
+                    
     def calculate_new_position(self, previous_position, angle):
         dx = np.cos(angle) * self.player_speed
         dy = np.sin(angle) * self.player_speed
