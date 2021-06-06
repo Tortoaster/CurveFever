@@ -14,7 +14,7 @@ current_generation = 0
 record_generations = []
 record_fitnesses = []
 
-output_folder = "static/picklesB/"
+output_folder = "static/picklesAttack/"
 
 def eval_genomes_tournament(genomes, config):
     global current_generation
@@ -80,7 +80,7 @@ def save_plot(stats):
     plt.ylabel("Fitness")
 
     plt.legend(['global best', 'generation best', 'generation mean'], loc='upper left')
-    plt.savefig("static/plotsB/plot.png")
+    plt.savefig("static/plotsAttack/plot.png")
 
 class genome(threading.Thread):
     def __init__(self, genomes, begin, end, config):
@@ -141,7 +141,7 @@ def run(config_file):
     # p.add_reporter(neat.Checkpointer(5))
     
     # Run
-    winner = p.run(eval_genomes_shuffle_3_games,10)
+    winner = p.run(eval_genomes_shuffle_3_games)
 
     save_plot(stats)
 
