@@ -14,7 +14,7 @@ current_generation = 0
 record_generations = []
 record_fitnesses = []
 
-output_folder = "static/picklesAttackB/"
+output_folder = "static/picklesAttackC/"
 
 def eval_genomes_tournament(genomes, config):
     global current_generation
@@ -42,6 +42,8 @@ def eval_genomes_shuffle_3_games(genomes, config):
         random.shuffle(genomes)
         threads += [genome(genomes[i:i + PLAYERS], i, i + PLAYERS, config) for i in range(0, len(genomes), PLAYERS)]
 
+    print("Starting", len(threads), "number of matches with", games, " games")
+
     for t in threads:
         t.start()
     [t.join() for t in threads]
@@ -50,10 +52,8 @@ def eval_genomes_shuffle_3_games(genomes, config):
         g.fitness /= games
 
     winner = max(genomes, key = lambda k: k[1].fitness)
-    
     check_highest(winner, config)
-
-
+    current_generation += 1
 
 def play(in_tournament, config, games):
     threads = []
@@ -72,14 +72,15 @@ def play(in_tournament, config, games):
     check_highest(winner, config)
 
 def save_plot(stats):
-    plt.plot(record_generations, record_fitnesses)
+    # plt.plot(record_generations, record_fitnesses)
     plt.plot(stats.get_fitness_stat(max))
     plt.plot(stats.get_fitness_mean())
 
     plt.xlabel("Generations")
     plt.ylabel("Fitness")
 
-    plt.legend(['global best', 'generation best', 'generation mean'], loc='upper left')
+    # plt.legend(['global best', 'generation best', 'generation mean'], loc='upper left')
+    plt.legend(['generation best', 'generation mean'], loc='upper left')
     plt.savefig(output_folder + "plot.png")
 
 class genome(threading.Thread):
@@ -122,7 +123,7 @@ def check_highest(winner, config):
         print("Highest fitness:", highest_fitness)
     if fitness >= 250:
         net = neat.nn.FeedForwardNetwork.create(winner[1], config)
-        pickle.dump(net, open(( output_folder + "neat-" + str(fitness) + ".pickle"), "wb"))
+        pickle.dump(net, open(( output_folder + "neat-" + str(current_generation) + "-" + str(fitness) + ".pickle"), "wb"))
     fitnessLock.release()
 
 
@@ -141,7 +142,7 @@ def run(config_file):
     # p.add_reporter(neat.Checkpointer(5))
     
     # Run
-    winner = p.run(eval_genomes_shuffle_3_games, 100)
+    winner = p.run(eval_genomes_shuffle_3_games, 25)
 
     save_plot(stats)
 

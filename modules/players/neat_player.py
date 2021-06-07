@@ -22,7 +22,7 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("static/picklesAttack/neat-948.2634185984679.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/picklesAttackC/neat-2-694.985705807098.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
@@ -38,31 +38,29 @@ class NeatPlayer(Player):
         player_distances = sorted([(self.game.distance_between_two_pos(self.position,p.position),p) for p in self.game.players if p.id != self.id ], key=lambda x: x[0])
         nearest_player = list(filter(lambda p: p[1].alive, player_distances))
         if not nearest_player:
-            angle_dis_inputs = [0, MAX_DISTANCE]
+            angle_dis_inputs = [0, MAX_DISTANCE, 0]
         else:
             distance = nearest_player[0][0]
             nearest_player = nearest_player[0][1]
-            angle_dis_inputs = [(self.angle % (2 * np.pi)) - (nearest_player.angle % (2 * np.pi)) - np.pi, min(distance, MAX_RAY_LENGTH)]
+
+            close_enemies = self.check_surroundings()
+
+            angle_dis_inputs = [(self.angle % (2 * np.pi)) - (nearest_player.angle % (2 * np.pi)) - np.pi, min(distance, MAX_RAY_LENGTH), close_enemies]
         if a:
             a = False
             print("players :", player_distances, "nearest players :", nearest_player, "ANGLE DIS:", angle_dis_inputs, flush=True)
-        # Give player extra fitness when in proximity of other players
-        if self.training:
-            for p in self.game.players:
-                if p.id != self.id:
-                    distance = self.game.distance_between_two_pos(self.position,p.position)
-                    if distance < MAX_DISTANCE:
-                        self.genome.fitness += ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 5
 
         # Get the outputs from the network
         # direction = self.net.activate(inputs)[0]
         outputs_left = self.net.activate(list(reversed(inputs[:RAYS // 2 + 1])) + angle_dis_inputs)[0]
+        angle_dis_inputs[0] = -angle_dis_inputs[0]
         outputs_right = -self.net.activate(inputs[RAYS // 2:] + angle_dis_inputs)[0]
         direction = outputs_right + outputs_left
 
+        # Give player extra fitness when in proximity of other players
         if self.training:
             # Increase fitness each time this function is called
-            self.genome.fitness += 1
+            self.genome.fitness += 1 + (self.check_surroundings())
 
         if direction < 0:
             return LEFT
@@ -84,3 +82,30 @@ class NeatPlayer(Player):
             # if not self.training:
             #     pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
         return MAX_RAY_LENGTH
+
+    def check_surroundings(self):
+        angle = self.angle + (1/2 * math.pi)
+        fitness_adjust = 0
+
+        slope = np.tan(angle)
+
+        b = self.position[1] - (slope * self.position[0])
+
+        players = self.game.players
+        for player in players:
+            if not player.id == self.id:
+                distance = self.game.distance_between_two_pos(self.position, player.position)
+                if distance < MAX_DISTANCE:
+                    x = player.position[0]
+                    y = player.position[1]
+                    if slope >= 0:
+                        if y < (slope * x + b):
+                            fitness_adjust -= ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 10
+                        else:
+                            fitness_adjust += ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 5
+                    if slope < 0:
+                        if y > (slope * x + b):
+                            fitness_adjust -= ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 10
+                        else:
+                            fitness_adjust += ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 5
+        return fitness_adjust
