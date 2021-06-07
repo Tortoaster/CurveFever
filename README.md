@@ -29,7 +29,7 @@ collided." - Wikipedia
 
 ![](static/img/CurveFever.gif)
 
-We wrote this project based on an open source python implementation of Curve fever using the pygame library. The
+We wrote this project based on an open-source python implementation of Curve fever using the pygame library. The
 original implementation can be found in this [repository](https://github.com/Valaraucoo/AchtungDiePython.git),
 and the implementation that features a minimax and deep learning agent can be found
 [here](https://github.com/dayMan33/CurveFever.git).
@@ -55,7 +55,7 @@ to install all dependencies. After that, you can train the NEAT player with
 
 Which will generate `.pickle` files in the `/static` folder.
 These can be loaded in `/modules/players/neat_player.py` to use them.
-By default, the program uses the latest successful agent.
+By default, the program uses our latest successful agent.
 
 Usage
 -----
