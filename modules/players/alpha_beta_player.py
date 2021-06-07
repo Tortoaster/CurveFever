@@ -26,7 +26,7 @@ class AlphaBetaPlayer(Player):
 
     def get_action(self, state):
         state_copy = State.from_state(state)
-        if 1 < len(state_copy.players) < self.n_of_opp or self.first_round:
+        if 1 < len(state_copy.alive) < self.n_of_opp or self.first_round:
             self.update_opponents(state_copy)
         values = []
         initial_position = self.get_initial_positions([self.id], state_copy)
@@ -92,7 +92,7 @@ class AlphaBetaPlayer(Player):
                     state.set_position(player, position)
                     state.set_angle(player, angle)
                     if self.game.detect_collision(player, state):
-                        state.players[i].alive = False
+                        state.alive[player] = False
                         if player != self.id:
                             self.update_opponents(state)
                         break
@@ -100,8 +100,8 @@ class AlphaBetaPlayer(Player):
 
             # if not player_died or not forward:
             if not forward:
-                if not state.players[i].alive:
-                    state.players[i].alive = True
+                if not state.alive[player]:
+                    state.alive[player] = True
                     if player != self.id:
                         self.update_opponents(state)
                 erase_head = True
@@ -115,7 +115,7 @@ class AlphaBetaPlayer(Player):
                 state.set_position(player, initial_positions[i][0])
                 state.set_angle(player, initial_positions[i][1])
                 state.draw_player(player)
-            if state.players[i].alive:
+            if state.alive[player]:
                 head_position = self.game.get_head_position(state.get_position(player), state.get_angle(player))
                 state.draw_head(head_position)
 
@@ -130,7 +130,7 @@ class AlphaBetaPlayer(Player):
         value = 0
         new_pos = state.get_position(self.id)
         new_angle = state.get_angle(self.id)
-        if self.game.detect_collision(self.id, state) or not state.players[self.id].alive:
+        if self.game.detect_collision(self.id, state) or not state.alive[self.id]:
             value -= 100
         for i in range(40, 0, -1):
             new_pos = self.game.calculate_new_position(new_pos, new_angle)
@@ -141,12 +141,12 @@ class AlphaBetaPlayer(Player):
         return value
 
     def update_opponents(self, state):
-        self.n_of_opp = len(state.players)
+        self.n_of_opp = len(state.alive)
         if self.first_round:
             self.initial_opponents = [i for i in range(self.n_of_opp) if i != self.id]
             self.first_round = False
         if self.n_of_opp > 1:
-            self.opponents = [opponent for opponent in self.initial_opponents if state.players[opponent].alive]
+            self.opponents = [opponent for opponent in self.initial_opponents if state.alive[opponent]]
             self.all_actions = list(itertools.product(range(3), repeat=self.n_of_opp - 1))
 
     def calc_fill_value(self, state):
@@ -219,7 +219,7 @@ class AlphaBetaHeuristic:
         # distances = np.ones(
         #     (int(ARENA_WIDTH / SUB_SAMPLE_FACTOR), int(ARENA_HEIGHT / SUB_SAMPLE_FACTOR), len(opponents_pos)))
 
-        if self.game.detect_collision(self.player.id, self.state) or not self.state.players[self.player.id].alive:
+        if self.game.detect_collision(self.player.id, self.state) or not self.state.alive[self.player.id]:
             return NEGATIVE_SCORE, euclidean_distance  # Return a very negative score
 
         nearest_tiles_max_player, nearest_tiles_opponents = self.get_distance_values(max_player_angle,

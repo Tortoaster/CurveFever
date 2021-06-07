@@ -35,20 +35,20 @@ class NeatPlayer(Player):
         angles = [-145, -126, -108, -91, -75, -60, -46, -33, -21, -10, 0, 10, 21, 33, 46, 60, 75, 91, 108, 126, 145]
         inputs = [self.cast_ray(angles[index]) / MAX_RAY_LENGTH for index in range(RAYS)]
         # Get nearest player (if it exists) and add the relative angle and distance to the inputs
-        player_distances = sorted([(self.game.distance_between_two_pos(self.position,p.position),p) for p in self.game.players if p.id != self.id ], key=lambda x: x[0])
-        nearest_player = list(filter(lambda p: p[1].alive, player_distances))
+        player_distances = sorted([(self.game.distance_between_two_pos(state.get_position(self.id), state.get_position(p.id)), p) for p in self.game.players if p.id != self.id ], key=lambda x: x[0])
+        nearest_player = list(filter(lambda p: state.alive[p[1].id], player_distances))
         if not nearest_player:
             angle_dis_inputs = [0, MAX_DISTANCE, 0]
         else:
             distance = nearest_player[0][0]
             nearest_player = nearest_player[0][1]
 
-            close_enemies = self.check_surroundings()
+            close_enemies = self.check_surroundings(state)
 
-            angle_dis_inputs = [(self.angle % (2 * np.pi)) - (nearest_player.angle % (2 * np.pi)) - np.pi, min(distance, MAX_RAY_LENGTH), close_enemies]
+            angle_dis_inputs = [(state.get_angle(self.id) % (2 * np.pi)) - (state.get_angle(nearest_player.id) % (2 * np.pi)) - np.pi, min(distance, MAX_RAY_LENGTH), close_enemies]
         if a:
             a = False
-            print("players :", player_distances, "nearest players :", nearest_player, "ANGLE DIS:", angle_dis_inputs, flush=True)
+            print("players :", player_distances, "nearest players :", nearest_player, "ANGLE DIS:", angle_dis_inputs)
 
         # Get the outputs from the network
         # direction = self.net.activate(inputs)[0]
@@ -60,7 +60,7 @@ class NeatPlayer(Player):
         # Give player extra fitness when in proximity of other players
         if self.training:
             # Increase fitness each time this function is called
-            self.genome.fitness += 1 + (self.check_surroundings())
+            self.genome.fitness += 1 + (self.check_surroundings(state))
 
         if direction < 0:
             return LEFT
@@ -83,21 +83,23 @@ class NeatPlayer(Player):
             #     pygame.draw.circle(self.game.window, WHITE, self.game.adjust_pos_to_screen(pos), 1)
         return MAX_RAY_LENGTH
 
-    def check_surroundings(self):
-        angle = self.angle + (1/2 * math.pi)
+    def check_surroundings(self, state):
+        angle = state.get_angle(self.id) + (1/2 * math.pi)
         fitness_adjust = 0
 
         slope = np.tan(angle)
 
-        b = self.position[1] - (slope * self.position[0])
+        pos = state.get_position(self.id)
+        b = pos[1] - (slope * pos[0])
 
         players = self.game.players
         for player in players:
             if not player.id == self.id:
-                distance = self.game.distance_between_two_pos(self.position, player.position)
+                pos2 = state.get_position(player.id)
+                distance = self.game.distance_between_two_pos(pos, pos2)
                 if distance < MAX_DISTANCE:
-                    x = player.position[0]
-                    y = player.position[1]
+                    x = pos2[0]
+                    y = pos2[1]
                     if slope >= 0:
                         if y < (slope * x + b):
                             fitness_adjust -= ((MAX_DISTANCE - distance) / MAX_DISTANCE) ** 2 * 10

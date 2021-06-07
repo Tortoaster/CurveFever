@@ -28,4 +28,4 @@ class PlayerFactory:
         elif player_type == 'ab':
             return AlphaBetaPlayer(id, game, MIN_MAX_DEPTH)
         elif player_type == 'n':
-            return NeatPlayer(id, game)
+            return NeatPlayer(id, game, None, None)
