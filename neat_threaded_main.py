@@ -14,7 +14,7 @@ current_generation = 0
 record_generations = []
 record_fitnesses = []
 
-output_folder = "static/picklesAttackC/"
+output_folder = "static/picklesAttackD/"
 
 def eval_genomes_tournament(genomes, config):
     global current_generation
@@ -103,7 +103,7 @@ class genome(threading.Thread):
         return tmp
 
     def run(self):
-        print("Range", self.begin, self.end)
+        # print("Range", self.begin, self.end)
         self.game.initialize(self.players)
         self.game.training_loop()
         # player = max(self.players, key=lambda k: k.genome.fitness)

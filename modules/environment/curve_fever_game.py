@@ -434,7 +434,7 @@ class CurveFever(object):
         pos1 = self.state.get_position(dead_player.id)
         for player in filter(lambda p: isinstance(p, NeatPlayer), self.players):
             pos2 = self.state.get_position(player.id)
-            if player.alive and self.distance_between_two_pos(pos1, pos2) < 50 and player.genome:
+            if self.state.alive[player.id] and self.distance_between_two_pos(pos1, pos2) < 50 and player.genome:
                 player.genome.fitness += KILL_FITNESS
 
     def update_lives(self):
