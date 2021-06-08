@@ -22,7 +22,7 @@ class NeatPlayer(Player):
         self.genome = genome
         if genome:
             genome.fitness = 0
-        self.net = net or pickle.load(open("static/picklesAttackC/neat-2-694.985705807098.pickle", 'rb'))
+        self.net = net or pickle.load(open("static/pickles/best.pickle", 'rb'))
         self.predictions = 0
         self.total_time = 0
         self.record = 0
