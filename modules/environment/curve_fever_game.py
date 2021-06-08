@@ -265,7 +265,7 @@ class CurveFever(object):
             if counter % 60 == 0:
                 print('.', end='', flush=True)
             counter += 1
-            self.training_tick()
+            self.tick()
             if not counter % 5:  # only sample action every few moves
                 self.update_actions()
             if np.sum(self.state.alive) <= 0:
@@ -275,12 +275,6 @@ class CurveFever(object):
             # if counter >= 6000:
             #     print("stuck")
             #     return
-
-    def training_tick(self):
-        self.apply_actions()
-        self.update_positions()
-        self.update_lives()
-        self.training_update_states()
 
     def training_update_states(self):
         for i in range(len(self.players)):

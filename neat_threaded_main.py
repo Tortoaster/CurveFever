@@ -14,7 +14,7 @@ current_generation = 0
 record_generations = []
 record_fitnesses = []
 
-output_folder = "static/picklesAttackD/"
+output_folder = "static/pickles/"
 
 def eval_genomes_tournament(genomes, config):
     global current_generation
